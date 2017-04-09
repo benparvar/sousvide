@@ -64,5 +64,4 @@ public class BluetoothBusiness extends BaseBusiness {
 
         return pairedDevices;
     }
-    
 }

@@ -6,6 +6,6 @@ package com.benparvar.sousvide.infrastructure;
 
 public class Constants {
     public interface Bluetooth {
-        public final int REQUEST_ENABLE_BT = 1;
+        public final int REQUEST_ENABLE_BT = 0;
     }
 }

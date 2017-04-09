@@ -3,4 +3,6 @@
     <string name="temperature">Temperature</string>
     <string name="timer">Timer</string>
     <string name="device">Device</string>
+    <string name="has_no_bluetooth_adapter">Has no bluetooth adapter</string>
+    <string name="disabled_bluetooth_adapter">Bluetooth adapter is disabled</string>
 </resources>
