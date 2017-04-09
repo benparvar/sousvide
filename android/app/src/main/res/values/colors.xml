@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <!-- INI Pan Status-->
+    <color name="panDisconnected">#c2b8b7</color>
+    <color name="panConnected">#2bd9e2</color>
+    <color name="panCooking">#FF4081</color>
+    <color name="panCooked">#d7f9ed11</color>
+    <color name="panOff">#40ff76</color>
+    <!-- END Pan Status-->
+</resources>
