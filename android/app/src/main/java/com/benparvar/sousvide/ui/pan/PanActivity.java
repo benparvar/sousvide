@@ -9,17 +9,23 @@ import android.view.View;
 import android.widget.Spinner;
 
 import com.benparvar.sousvide.R;
+import com.benparvar.sousvide.business.BluetoothBusiness;
 
 public class PanActivity extends AppCompatActivity {
     private AppCompatSeekBar skbTemperature;
     private AppCompatSeekBar skbTimer;
     private AppCompatImageButton btnPan;
     private Spinner spnDevice;
+    private BluetoothBusiness mBluetoothBusiness;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pan);
+
+        mBluetoothBusiness = new BluetoothBusiness(PanActivity.this);
+        mBluetoothBusiness.activate();
+        mBluetoothBusiness.getPairedDevices();
 
         // Bind
         skbTemperature = (AppCompatSeekBar) findViewById(R.id.temperature_skb);
