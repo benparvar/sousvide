@@ -82,7 +82,7 @@ void readCurrentTemperature() {
   if (VALUE_OF_INVALID_TEMPERATURE != tempe) {
     currentTemperature = tempe;
 
-    //PAN CURRENT TEMPERATURE -> "PAN:S:003:00000"
+    //PAN CURRENT TEMPERATURE -> "PAN:S:003:000.00"
     String data = HEADER;
     data.concat(SEPARATOR);
     data.concat(STATUS);
