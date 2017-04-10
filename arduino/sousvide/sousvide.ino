@@ -1,12 +1,15 @@
 /**
- * 
- * Bluetooth sousvide v1.0
- * by benparvar@gmail.com
- * 
- */
- 
+
+   Bluetooth sousvide v1.0
+   by benparvar@gmail.com
+
+*/
 #include <SoftwareSerial.h>
-int LED = 13;
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+#define THERMOMETER_PIN 2
+#define HEATER_PIN 13
 
 boolean DEBUG = false;
 
@@ -45,29 +48,55 @@ String INVALID_NO_PROGRAMMED = "908";
 // PAN STATUS
 String panStatus = STS_OFF;
 
+double VALUE_OF_INVALID_TEMPERATURE = -127;
+
 // PAN TIMER
-int currentTimer = 0;
-int targetTimer = 0;
+long currentTimer = 0;
+long targetTimer = 0;
 
 // PAN TEMPERATURE
-int currentTemperature = 0;
-int targetTemperature = 0;
+double currentTemperature = 0;
+double targetTemperature = 0;
 
 // TEMPERATURE LIMITS (C)
-float MIN_TEMPERATURE = 30.00;
-float MAX_TEMPERATURE = 80.00;
+double MIN_TEMPERATURE = 30.00;
+double MAX_TEMPERATURE = 80.00;
 
 // TIMER (MILI SECONDS)
-float MIN_TIMER = 0.00;
-float MAX_TIMER = 100000.00;
+long MIN_TIMER = 0.00;
+long MAX_TIMER = 100000.00;
 
 SoftwareSerial swSerial = SoftwareSerial(1, 0);
+OneWire ds18b20(THERMOMETER_PIN);
+DallasTemperature temperatureSensor(&ds18b20);
 
 void setup() {
-  pinMode(LED, OUTPUT);
+  pinMode(HEATER_PIN, OUTPUT);
   swSerial.begin(9600); // this sets the the module to run at the default bound rate
 }
 
+void readCurrentTemperature() {
+  temperatureSensor.requestTemperatures();
+  double tempe = temperatureSensor.getTempCByIndex(0);
+
+  if (VALUE_OF_INVALID_TEMPERATURE != tempe) {
+    currentTemperature = tempe;
+
+    //PAN CURRENT TEMPERATURE -> "PAN:S:003:00000"
+    String data = HEADER;
+    data.concat(SEPARATOR);
+    data.concat(STATUS);
+    data.concat(SEPARATOR);
+    data.concat(PAN_TEMPERATURE);
+    data.concat(SEPARATOR);
+    data.concat(currentTemperature);
+    sendData(data);
+  }
+}
+
+/**
+   Reset the PAN
+*/
 void reset() {
   targetTemperature = 0;
   targetTimer = 0;
@@ -76,12 +105,18 @@ void reset() {
   panStatus = STS_OFF;
 }
 
+/**
+   Verify if the PAN is programmed
+*/
 void verifyProgram() {
   if ((targetTemperature > 0) && (targetTimer > 0)) {
     panStatus = STS_READY;
   }
 }
 
+/**
+   Cook on
+*/
 void cookOn() {
   if (panStatus == STS_OFF) {
     sendError(INVALID_NO_PROGRAMMED);
@@ -91,7 +126,7 @@ void cookOn() {
     sendError(INVALID_ALREADY_FINISHED_COOKING);
   } else if (panStatus == STS_READY) {
     panStatus = STS_COOK_IN_PROGRESS;
-    digitalWrite(LED, HIGH);
+    digitalWrite(HEATER_PIN, HIGH);
     //PAN ON -> "PAN:S:001"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -102,11 +137,14 @@ void cookOn() {
   }
 }
 
+/**
+   Cook off
+*/
 void cookOff() {
   if (panStatus == STS_OFF || panStatus == STS_READY) {
     sendError(INVALID_ALREADY_OFF);
   } else if (panStatus == STS_COOK_IN_PROGRESS || panStatus == STS_COOK_FINISHED) {
-    digitalWrite(LED, LOW);
+    digitalWrite(HEATER_PIN, LOW);
     reset();
     //PAN OFF -> "PAN:S:000"
     String data = HEADER;
@@ -221,7 +259,7 @@ void sendError(String error) {
 }
 
 void sendData(String data) {
-  swSerial.print(data);
+  swSerial.println(data);
 }
 
 void sendDebug(String tag, String data) {
@@ -236,4 +274,5 @@ void sendDebug(String tag, String data) {
 
 void loop() {
   receiveData();
+  readCurrentTemperature();
 }
