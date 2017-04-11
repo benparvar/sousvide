@@ -33,6 +33,8 @@ String PAN_TIMER = "002";
 String PAN_TEMPERATURE = "003";
 String PAN_TIMER_TARGET = "004";
 String PAN_TEMPERATURE_TARGET = "005";
+String PAN_CURRENT_TIMER = "006";
+String PAN_CURRENT_TEMPERATURE = "007";
 
 // ERROR CODE
 String INVALID_HEADER = "900";
@@ -60,11 +62,11 @@ double targetTemperature = 0;
 
 // TEMPERATURE LIMITS (C)
 double MIN_TEMPERATURE = 30.00;
-double MAX_TEMPERATURE = 80.00;
+double MAX_TEMPERATURE = 60.00;
 
 // TIMER (MILI SECONDS)
-long MIN_TIMER = 0.00;
-long MAX_TIMER = 100000.00;
+long MIN_TIMER = 0.50;
+long MAX_TIMER = 1440.00;
 
 SoftwareSerial swSerial = SoftwareSerial(1, 0);
 OneWire ds18b20(THERMOMETER_PIN);
@@ -82,12 +84,12 @@ void readCurrentTemperature() {
   if (VALUE_OF_INVALID_TEMPERATURE != tempe) {
     currentTemperature = tempe;
 
-    //PAN CURRENT TEMPERATURE -> "PAN:S:003:000.00"
+    //PAN CURRENT TEMPERATURE -> "PAN:S:007:000.00"
     String data = HEADER;
     data.concat(SEPARATOR);
     data.concat(STATUS);
     data.concat(SEPARATOR);
-    data.concat(PAN_TEMPERATURE);
+    data.concat(PAN_CURRENT_TEMPERATURE);
     data.concat(SEPARATOR);
     data.concat(currentTemperature);
     sendData(data);
@@ -159,7 +161,7 @@ void cookOff() {
 void setTimer(String timer) {
   sendDebug("timer", timer);
 
-  float tim = timer.toFloat();
+  float tim = timer.toFloat() / 100;
 
   if (tim < MIN_TIMER || tim > MAX_TIMER) {
     sendError(INVALID_TIMER_TARGET);
