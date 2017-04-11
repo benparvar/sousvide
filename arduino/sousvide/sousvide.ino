@@ -4,6 +4,7 @@
    by benparvar@gmail.com
 
 */
+
 #include <SoftwareSerial.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
@@ -12,6 +13,9 @@
 #define HEATER_PIN 13
 
 boolean DEBUG = false;
+
+// Last
+String lastSendData = "";
 
 // STATUS
 String STS_OFF = "0";
@@ -35,6 +39,9 @@ String PAN_TIMER_TARGET = "004";
 String PAN_TEMPERATURE_TARGET = "005";
 String PAN_CURRENT_TIMER = "006";
 String PAN_CURRENT_TEMPERATURE = "007";
+String PAN_READY = "008";
+String PAN_COOK_IN_PROGRESS = "009";
+String PAN_COOK_FINISHED = "010";
 
 // ERROR CODE
 String INVALID_HEADER = "900";
@@ -53,16 +60,16 @@ String panStatus = STS_OFF;
 double VALUE_OF_INVALID_TEMPERATURE = -127;
 
 // PAN TIMER
-long currentTimer = 0;
-long targetTimer = 0;
+long currentTimer = 0000;
+long targetTimer = 0000;
 
 // PAN TEMPERATURE
-double currentTemperature = 0;
-double targetTemperature = 0;
+int currentTemperature = 0000;
+int targetTemperature = 0000;
 
 // TEMPERATURE LIMITS (C)
-double MIN_TEMPERATURE = 30.00;
-double MAX_TEMPERATURE = 60.00;
+int MIN_TEMPERATURE = 3000;
+int MAX_TEMPERATURE = 6000;
 
 // TIMER (MILI SECONDS)
 long MIN_TIMER = 0.50;
@@ -77,14 +84,17 @@ void setup() {
   swSerial.begin(9600); // this sets the the module to run at the default bound rate
 }
 
+/**
+   Read the current temperature
+*/
 void readCurrentTemperature() {
   temperatureSensor.requestTemperatures();
   double tempe = temperatureSensor.getTempCByIndex(0);
 
   if (VALUE_OF_INVALID_TEMPERATURE != tempe) {
-    currentTemperature = tempe;
+    currentTemperature = tempe * 100;
 
-    //PAN CURRENT TEMPERATURE -> "PAN:S:007:000.00"
+    //PAN CURRENT TEMPERATURE -> "PAN:S:007:0000:0000"
     String data = HEADER;
     data.concat(SEPARATOR);
     data.concat(STATUS);
@@ -92,8 +102,35 @@ void readCurrentTemperature() {
     data.concat(PAN_CURRENT_TEMPERATURE);
     data.concat(SEPARATOR);
     data.concat(currentTemperature);
+    data.concat(SEPARATOR);
+    data.concat(targetTemperature);
     sendData(data);
   }
+}
+
+void readCurrentTimer() {
+
+}
+
+void readCurrentStatus() {
+  String status = "";
+
+  if (panStatus == STS_OFF) {
+    status = PAN_OFF;
+  } else if (panStatus == STS_READY) {
+    status = PAN_READY;
+  } else if (panStatus == STS_COOK_IN_PROGRESS) {
+    status = PAN_COOK_IN_PROGRESS;
+  } else if (panStatus == STS_COOK_FINISHED) {
+    status = PAN_COOK_FINISHED;
+  }
+
+  String data = HEADER;
+  data.concat(SEPARATOR);
+  data.concat(STATUS);
+  data.concat(SEPARATOR);
+  data.concat(status);
+  sendData(data);
 }
 
 /**
@@ -158,6 +195,9 @@ void cookOff() {
   }
 }
 
+/**
+   Set the timer
+*/
 void setTimer(String timer) {
   sendDebug("timer", timer);
 
@@ -180,10 +220,13 @@ void setTimer(String timer) {
   }
 }
 
+/**
+   Set the temperature
+*/
 void setTemperature(String temperature) {
   sendDebug("temperature", temperature);
 
-  float temper = temperature.toFloat() / 100;
+  float temper = temperature.toFloat();
 
   if (temper < MIN_TEMPERATURE || temper > MAX_TEMPERATURE) {
     sendError(INVALID_TEMPERATURE_TARGET);
@@ -202,6 +245,9 @@ void setTemperature(String temperature) {
   }
 }
 
+/**
+   Receive data from external devices
+*/
 void receiveData() {
   String inData;
   if (swSerial.available()) {
@@ -251,6 +297,9 @@ void receiveData() {
   }
 }
 
+/**
+   Send error to output
+*/
 void sendError(String error) {
   String data = HEADER;
   data.concat(SEPARATOR);
@@ -260,10 +309,19 @@ void sendError(String error) {
   sendData(data);
 }
 
+/*
+   Send data to output
+*/
 void sendData(String data) {
-  swSerial.println(data);
+  if (lastSendData != data) {
+    swSerial.println(data);
+    lastSendData = data;
+  }
 }
 
+/*
+   Send debug to output
+*/
 void sendDebug(String tag, String data) {
   if (DEBUG) {
     swSerial.print("\n*************\n");
@@ -274,7 +332,12 @@ void sendDebug(String tag, String data) {
   }
 }
 
+/**
+   The loop
+*/
 void loop() {
   receiveData();
   readCurrentTemperature();
+  readCurrentTimer();
+  readCurrentStatus();
 }

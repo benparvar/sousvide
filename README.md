@@ -39,7 +39,7 @@ PAN:V:003:0000	Set the heater temperature
 
 * Output Examples *
 
-PAN:S:007:39.06	Current temperature is 39.06 (C)
+PAN:S:007:3906:7000	Current temperature is 39.06 (C), the target is 70.00 (C)
 
 
 
