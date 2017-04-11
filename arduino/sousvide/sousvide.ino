@@ -72,8 +72,11 @@ int MIN_TEMPERATURE = 3000;
 int MAX_TEMPERATURE = 6000;
 
 // TIMER (MILI SECONDS)
-long MIN_TIMER = 0.50;
-long MAX_TIMER = 1440.00;
+long MIN_TIMER = 0;
+long MAX_TIMER = 86400; // A day
+
+long previousMillis = 0;
+long millisInterval = 1000;
 
 SoftwareSerial swSerial = SoftwareSerial(1, 0);
 OneWire ds18b20(THERMOMETER_PIN);
@@ -109,7 +112,28 @@ void readCurrentTemperature() {
 }
 
 void readCurrentTimer() {
+  if (panStatus == STS_COOK_IN_PROGRESS) {
+    if( countTimer()) {
+      currentTimer++;
+    }
 
+    if (currentTimer > targetTimer) {
+      cookOff();
+      panStatus == STS_COOK_FINISHED;
+    }
+
+    //PAN CURRENT TIMER -> "PAN:S:006:0000:0000"
+    String data = HEADER;
+    data.concat(SEPARATOR);
+    data.concat(STATUS);
+    data.concat(SEPARATOR);
+    data.concat(PAN_CURRENT_TIMER);
+    data.concat(SEPARATOR);
+    data.concat(currentTimer);
+    data.concat(SEPARATOR);
+    data.concat(targetTimer);
+    sendData(data);
+  }
 }
 
 void readCurrentStatus() {
@@ -201,7 +225,7 @@ void cookOff() {
 void setTimer(String timer) {
   sendDebug("timer", timer);
 
-  float tim = timer.toFloat() / 100;
+  float tim = timer.toFloat();
 
   if (tim < MIN_TIMER || tim > MAX_TIMER) {
     sendError(INVALID_TIMER_TARGET);
@@ -330,6 +354,18 @@ void sendDebug(String tag, String data) {
     swSerial.print(data);
     swSerial.print("\n*************\n");
   }
+}
+
+boolean countTimer() {
+  unsigned long currentMillis = millis();
+  boolean count = false;
+
+  if (currentMillis - previousMillis > millisInterval) {
+    previousMillis = currentMillis;
+    count = true;
+  }
+
+  return count;
 }
 
 /**
