@@ -113,7 +113,7 @@ void readCurrentTemperature() {
 
 void readCurrentTimer() {
   if (panStatus == STS_COOK_IN_PROGRESS) {
-    if( countTimer()) {
+    if ( countTimer()) {
       currentTimer++;
     }
 
@@ -270,6 +270,21 @@ void setTemperature(String temperature) {
 }
 
 /**
+   Try to keep the temperature
+*/
+void controlTemperature() {
+  if (panStatus == STS_COOK_IN_PROGRESS) {
+    double maxTemperatureDelta = targetTemperature * 0.95;
+    double minTemperatureDelta = targetTemperature * 0.90;
+    if (currentTemperature >= maxTemperatureDelta) {
+      digitalWrite(HEATER_PIN, LOW);
+    } else if (currentTemperature <= minTemperatureDelta) {
+      digitalWrite(HEATER_PIN, HIGH);
+    }
+  }
+}
+
+/**
    Receive data from external devices
 */
 void receiveData() {
@@ -376,4 +391,5 @@ void loop() {
   readCurrentTemperature();
   readCurrentTimer();
   readCurrentStatus();
+  controlTemperature();
 }
