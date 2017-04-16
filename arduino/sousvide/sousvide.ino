@@ -1,16 +1,17 @@
 /**
-
-   Bluetooth sousvide v1.0
-   by benparvar@gmail.com
-
+    Bluetooth sousvide v1.0
+    by benparvar@gmail.com
 */
 
 #include <SoftwareSerial.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <PID_v1.h>
+//#include <PID_AutoTune_v0.h>
 
 #define THERMOMETER_PIN 2
 #define HEATER_PIN 13
+#define PID_OUTPUT 0
 
 boolean DEBUG = false;
 
@@ -42,6 +43,7 @@ String PAN_CURRENT_TEMPERATURE = "007";
 String PAN_READY = "008";
 String PAN_COOK_IN_PROGRESS = "009";
 String PAN_COOK_FINISHED = "010";
+String PID_VALUE = "011";
 
 // ERROR CODE
 String INVALID_HEADER = "900";
@@ -64,8 +66,8 @@ long currentTimer = 0000;
 long targetTimer = 0000;
 
 // PAN TEMPERATURE
-int currentTemperature = 0000;
-int targetTemperature = 0000;
+double currentTemperature = 0000;
+double targetTemperature = 0000;
 
 // TEMPERATURE LIMITS (C)
 int MIN_TEMPERATURE = 3000;
@@ -78,6 +80,10 @@ long MAX_TIMER = 86400; // A day
 long previousMillis = 0;
 long millisInterval = 1000;
 
+//PID Stuff
+double kp = 196, ki = 33, kd = 290, PIDOutput = PID_OUTPUT;
+PID PIDCalculation(&currentTemperature, &PIDOutput, &targetTemperature, kp, ki, kd, DIRECT);
+
 SoftwareSerial swSerial = SoftwareSerial(1, 0);
 OneWire ds18b20(THERMOMETER_PIN);
 DallasTemperature temperatureSensor(&ds18b20);
@@ -85,6 +91,7 @@ DallasTemperature temperatureSensor(&ds18b20);
 void setup() {
   pinMode(HEATER_PIN, OUTPUT);
   swSerial.begin(9600); // this sets the the module to run at the default bound rate
+  initializePID();
 }
 
 /**
@@ -274,15 +281,59 @@ void setTemperature(String temperature) {
 */
 void controlTemperature() {
   if (panStatus == STS_COOK_IN_PROGRESS) {
-    double maxTemperatureDelta = targetTemperature * 0.95;
-    double minTemperatureDelta = targetTemperature * 0.90;
-    if (currentTemperature >= maxTemperatureDelta) {
-      digitalWrite(HEATER_PIN, LOW);
-    } else if (currentTemperature <= minTemperatureDelta) {
-      digitalWrite(HEATER_PIN, HIGH);
-    }
+    //    double maxTemperatureDelta = (targetTemperature - 5) * 0.95;
+    //    double minTemperatureDelta = targetTemperature * 0.90;
+    //    if (currentTemperature >= maxTemperatureDelta) {
+    //      digitalWrite(HEATER_PIN, LOW);
+    //    } else if (currentTemperature <= minTemperatureDelta) {
+    //      digitalWrite(HEATER_PIN, HIGH);
+    //    }
+    analogWrite(HEATER_PIN, PIDOutput);
+  } else {
+    digitalWrite(HEATER_PIN, LOW);
   }
 }
+
+// INI PID
+void initializePID() {
+  PIDCalculation.SetTunings(kp, ki, kd);
+  PIDCalculation.SetMode(AUTOMATIC);
+}
+
+void calculatePID() {
+  // Limit the resistor block using PWM since the heating is precise
+  if (targetTemperature - currentTemperature > 15) {
+    PIDCalculation.SetOutputLimits(0, 255);
+  } else if (targetTemperature - currentTemperature > 10) {
+    PIDCalculation.SetOutputLimits(0, 130);
+  } else if (targetTemperature - currentTemperature > 3) {
+    PIDCalculation.SetOutputLimits(0, 100);
+  } else if (targetTemperature - currentTemperature > 1) {
+    PIDCalculation.SetOutputLimits(0, 40);
+  } else if (targetTemperature - currentTemperature > 0) {
+    PIDCalculation.SetOutputLimits(0, 120);
+  } else if (targetTemperature - currentTemperature > -2) {
+    PIDCalculation.SetOutputLimits(0, 255);
+  }
+
+  // Compute the PID calculation
+  PIDCalculation.Compute();
+  //  Serial.print(currentTemperature);
+  //  Serial.print(" - ");
+  //  Serial.println(PIDOutput);
+
+  if (panStatus == STS_COOK_IN_PROGRESS) {
+    String data = HEADER;
+    data.concat(SEPARATOR);
+    data.concat(STATUS);
+    data.concat(SEPARATOR);
+    data.concat(PID_VALUE);
+    data.concat(SEPARATOR);
+    data.concat(PIDOutput);
+    sendData(data);
+  }
+}
+// END PID
 
 /**
    Receive data from external devices
@@ -371,6 +422,9 @@ void sendDebug(String tag, String data) {
   }
 }
 
+/**
+   Count timer 1000 miliseconds
+*/
 boolean countTimer() {
   unsigned long currentMillis = millis();
   boolean count = false;
@@ -389,6 +443,7 @@ boolean countTimer() {
 void loop() {
   receiveData();
   readCurrentTemperature();
+  calculatePID();
   readCurrentTimer();
   readCurrentStatus();
   controlTemperature();
