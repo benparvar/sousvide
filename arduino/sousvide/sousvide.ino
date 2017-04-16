@@ -62,12 +62,12 @@ String panStatus = STS_OFF;
 double VALUE_OF_INVALID_TEMPERATURE = -127;
 
 // PAN TIMER
-long currentTimer = 0000;
-long targetTimer = 0000;
+long currentTimer = 0;
+long targetTimer = 0;
 
 // PAN TEMPERATURE
-double currentTemperature = 0000;
-double targetTemperature = 0000;
+double currentTemperature = 0;
+double targetTemperature = 0;
 
 // TEMPERATURE LIMITS (C)
 int MIN_TEMPERATURE = 3000;
@@ -281,13 +281,6 @@ void setTemperature(String temperature) {
 */
 void controlTemperature() {
   if (panStatus == STS_COOK_IN_PROGRESS) {
-    //    double maxTemperatureDelta = (targetTemperature - 5) * 0.95;
-    //    double minTemperatureDelta = targetTemperature * 0.90;
-    //    if (currentTemperature >= maxTemperatureDelta) {
-    //      digitalWrite(HEATER_PIN, LOW);
-    //    } else if (currentTemperature <= minTemperatureDelta) {
-    //      digitalWrite(HEATER_PIN, HIGH);
-    //    }
     analogWrite(HEATER_PIN, PIDOutput);
   } else {
     digitalWrite(HEATER_PIN, LOW);
@@ -301,29 +294,36 @@ void initializePID() {
 }
 
 void calculatePID() {
-  double delta = targetTemperature - currentTemperature;
+  double delta = (targetTemperature - currentTemperature) / 100;
+
+  //  swSerial.print("tar : ");
+  //  swSerial.println(targetTemperature / 100);
+  //  swSerial.print("cur : ");
+  //  swSerial.println(currentTemperature / 100);
+  //  swSerial.print("del : ");
+  //  swSerial.println(delta);
+
   // Limit the resistor block using PWM since the heating is precise
-  if (delta > 15) {
+  if (delta > 8) {
     PIDCalculation.SetOutputLimits(0, 255);
-  } else if (delta > 10) {
-    PIDCalculation.SetOutputLimits(0, 130);
+  } else if (delta > 5) {
+    PIDCalculation.SetOutputLimits(0, 235);
   } else if (delta > 3) {
-    PIDCalculation.SetOutputLimits(0, 100);
+    PIDCalculation.SetOutputLimits(0, 215);
+  } else if (delta > 2) {
+    PIDCalculation.SetOutputLimits(0, 195);
   } else if (delta > 1) {
-    PIDCalculation.SetOutputLimits(0, 40);
+    PIDCalculation.SetOutputLimits(0, 175);
   } else if (delta > 0) {
-    PIDCalculation.SetOutputLimits(0, 120);
+    PIDCalculation.SetOutputLimits(0, 155);
   } else if (delta > -2) {
     PIDCalculation.SetOutputLimits(0, 255);
   }
 
   // Compute the PID calculation
   PIDCalculation.Compute();
-  //  Serial.print(currentTemperature);
-  //  Serial.print(" - ");
-  //  Serial.println(PIDOutput);
 
-  if (panStatus == STS_COOK_IN_PROGRESS) {
+  if (panStatus == STS_COOK_IN_PROGRESS && DEBUG) {
     String data = HEADER;
     data.concat(SEPARATOR);
     data.concat(STATUS);

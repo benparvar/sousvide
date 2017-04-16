@@ -44,8 +44,8 @@ PAN:S:007:3906:7000	Current temperature is 39.06 (C), the target is 70.00 (C)
 
 * Examples
 PAN:V:000
-PAN:V:003:3500
-PAN:V:002:6000
+PAN:V:003:4000
+PAN:V:002:600
 PAN:V:001
 
 
