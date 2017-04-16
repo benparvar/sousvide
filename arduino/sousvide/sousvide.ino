@@ -301,18 +301,19 @@ void initializePID() {
 }
 
 void calculatePID() {
+  double delta = targetTemperature - currentTemperature;
   // Limit the resistor block using PWM since the heating is precise
-  if (targetTemperature - currentTemperature > 15) {
+  if (delta > 15) {
     PIDCalculation.SetOutputLimits(0, 255);
-  } else if (targetTemperature - currentTemperature > 10) {
+  } else if (delta > 10) {
     PIDCalculation.SetOutputLimits(0, 130);
-  } else if (targetTemperature - currentTemperature > 3) {
+  } else if (delta > 3) {
     PIDCalculation.SetOutputLimits(0, 100);
-  } else if (targetTemperature - currentTemperature > 1) {
+  } else if (delta > 1) {
     PIDCalculation.SetOutputLimits(0, 40);
-  } else if (targetTemperature - currentTemperature > 0) {
+  } else if (delta > 0) {
     PIDCalculation.SetOutputLimits(0, 120);
-  } else if (targetTemperature - currentTemperature > -2) {
+  } else if (delta > -2) {
     PIDCalculation.SetOutputLimits(0, 255);
   }
 
@@ -330,6 +331,8 @@ void calculatePID() {
     data.concat(PID_VALUE);
     data.concat(SEPARATOR);
     data.concat(PIDOutput);
+    data.concat(SEPARATOR);
+    data.concat(delta);
     sendData(data);
   }
 }
