@@ -21,4 +21,22 @@ public class Pan {
         this.timer = timer;
         this.working = working;
     }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "Pan{" +
+                "address='" + address + '\'' +
+                ", working=" + working +
+                ", temperature=" + temperature +
+                ", timer=" + timer +
+                '}';
+    }
 }

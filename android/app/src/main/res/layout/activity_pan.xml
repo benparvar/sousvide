@@ -36,7 +36,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_margin="10dp" />
+        android:layout_margin="10dp"
+        android:spinnerMode="dialog" />
 
     <!-- Temperature -->
     <android.support.v7.widget.AppCompatTextView
@@ -71,4 +72,13 @@
         android:layout_gravity="center_horizontal"
         android:layout_margin="10dp"
         android:max="60" />
+
+    <ProgressBar
+        android:id="@+id/progressBarLoading"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="10dp"
+        android:visibility="gone"/>
 </LinearLayout>

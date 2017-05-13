@@ -5,4 +5,11 @@
     <string name="device">Device</string>
     <string name="has_no_bluetooth_adapter">Has no bluetooth adapter</string>
     <string name="disabled_bluetooth_adapter">Bluetooth adapter is disabled</string>
+
+    <!-- Error Ini -->
+    <string name="no_error">No error</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="no_paired_devices">No paired devices</string>
+    <string name="yes_paired_devices">Yes paired devices</string>
+    <!-- Error End -->
 </resources>
