@@ -159,7 +159,7 @@ public class BluetoothBusiness extends BaseBusiness {
                                 if (b == delimiter) {
                                     byte[] encodedBytes = new byte[readBufferPosition];
                                     System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    final String data = new String(encodedBytes, "US-ASCII");
+                                    final String data = new String(encodedBytes, "US-ASCII").replace("�", ""); // Removing the character �
                                     readBufferPosition = 0;
 
                                     handler.post(new Runnable() {
