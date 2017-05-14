@@ -69,7 +69,6 @@ public class PanBusiness extends BaseBusiness {
         return this.mPam;
     }
 
-
     public OperationResult<Pan> onClick(Pan pan) {
         int error = UNKNOWN;
         OperationResult<Pan> result = new OperationResult<>();
@@ -86,17 +85,7 @@ public class PanBusiness extends BaseBusiness {
         // I Have Paired devices
         if (error == YES_PAIRED_DEVICES) {
             try {
-                if (mBluetoothBusiness.openDeviceConnection(mPam.getAddress())) {
-                    //  Read
-                    String panStatus = mBluetoothBusiness.readFromDevice();
-                    Log.d(TAG, panStatus);
-                    // TODO - Parse PanStatus
-
-
-
-                    // Write
-                    // TODO - Write on Pan
-                }
+                mBluetoothBusiness.openDeviceConnection(mPam.getAddress());
             } catch (IOException e) {
                Log.e(TAG, e.getMessage());
             }

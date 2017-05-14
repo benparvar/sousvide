@@ -1,6 +1,7 @@
 package com.benparvar.sousvide.ui.pan;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,9 @@ import com.benparvar.sousvide.entity.Pan;
 import com.benparvar.sousvide.infrastructure.OperationListener;
 import com.benparvar.sousvide.manager.PanManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PanActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private final String TAG = "PanActivity";
     private AppCompatSeekBar skbTemperature;
@@ -27,6 +31,9 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
     private PanManager mPanManager;
     private Pan mPan;
     private ProgressBar mProgressBar;
+
+    ArrayAdapter mDevicesAdapter;
+    List<BluetoothDevice> mBluetoothDevices = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +55,9 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
         btnPan = (AppCompatImageButton) findViewById(R.id.pan_btn);
 
         spnDevice = (Spinner) findViewById(R.id.device_spn);
-        ArrayAdapter devicesAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, mPanManager.getPairedDevices());
-        devicesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spnDevice.setAdapter(devicesAdapter);
+        mDevicesAdapter = new ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, this.mBluetoothDevices);
+        mDevicesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnDevice.setAdapter(mDevicesAdapter);
 
         spnDevice.setOnItemSelectedListener(this);
 
@@ -60,6 +67,7 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
             public void onClick(View view) {
                 showProgressBar(Boolean.TRUE);
 
+                getPairedDevices();
                 mPanManager.onClick(mPan, new OperationListener<Pan>() {
                     @Override
                     public void onSuccess(Pan result) {
@@ -88,6 +96,14 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
                 });
             }
         });
+
+        getPairedDevices();
+    }
+
+    private void getPairedDevices() {
+        this.mBluetoothDevices.clear();
+        this.mBluetoothDevices.addAll(mPanManager.getPairedDevices());
+        mDevicesAdapter.notifyDataSetChanged();
     }
 
     private void showProgressBar(Boolean show) {

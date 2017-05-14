@@ -8,6 +8,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import com.benparvar.sousvide.ui.pan.PanActivity;
@@ -16,11 +18,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.benparvar.sousvide.infrastructure.Constants.Bluetooth.END_LINE;
 import static com.benparvar.sousvide.infrastructure.Constants.Bluetooth.REQUEST_ENABLE_BT;
 import static com.benparvar.sousvide.infrastructure.Constants.ErrorCode.NO_PAIRED_DEVICES;
 
@@ -32,8 +36,13 @@ public class BluetoothBusiness extends BaseBusiness {
     private final String TAG = "BluetoothBusiness";
     private BluetoothAdapter mBluetoothAdapter;
     private static final String UUID_SERIAL_PORT_PROFILE = "00001101-0000-1000-8000-00805F9B34FB";
-    private BluetoothSocket mSocket = null;
-    private BufferedReader mBufferedReader = null;
+    private BluetoothSocket mSocket;
+    private OutputStream mmOutputStream;
+    private InputStream mmInputStream;
+    private volatile boolean stopWorker;
+    private byte[] readBuffer;
+    private int readBufferPosition;
+    private Thread workerThread;
 
     public BluetoothBusiness(Context context) {
         super(context);
@@ -91,48 +100,92 @@ public class BluetoothBusiness extends BaseBusiness {
         return result;
     }
 
-    public Boolean openDeviceConnection(String address)
+    public void openDeviceConnection(String address)
             throws IOException {
         BluetoothDevice aDevice = getDeviceByAddress(address);
 
         if (null == mSocket) {
             mSocket = aDevice.createRfcommSocketToServiceRecord(UUID.fromString(UUID_SERIAL_PORT_PROFILE));
-        }
-//        if (null == mSocket) {
-//            mSocket = aDevice.createInsecureRfcommSocketToServiceRecord(UUID.fromString(UUID_SERIAL_PORT_PROFILE));
-//        }
-
-        if (!mSocket.isConnected()) {
             mSocket.connect();
         }
 
-        return mSocket.isConnected();
+        mmOutputStream = mSocket.getOutputStream();
+        mmInputStream = mSocket.getInputStream();
+
+        // http://stackoverflow.com/questions/13450406/how-to-receive-serial-data-using-android-bluetooth
+        initializeListener();
+
+    }
+
+    public void closeDeviceConnection() {
+        stopWorker = true;
+        try {
+            mmOutputStream.close();
+            mmInputStream.close();
+            mSocket.close();
+        } catch (IOException e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    private void initializeListener() {
+        final Handler handler = new Handler(Looper.getMainLooper());
+        final byte delimiter = 10; //This is the ASCII code for a newline character
+
+        stopWorker = false;
+        readBufferPosition = 0;
+        readBuffer = new byte[1024];
+        workerThread = new Thread(new Runnable() {
+            public void run() {
+                while (!Thread.currentThread().isInterrupted() && !stopWorker) {
+                    try {
+                        int bytesAvailable = mmInputStream.available();
+                        if (bytesAvailable > 0) {
+                            byte[] packetBytes = new byte[bytesAvailable];
+                            mmInputStream.read(packetBytes);
+                            for (int i = 0; i < bytesAvailable; i++) {
+                                byte b = packetBytes[i];
+                                if (b == delimiter) {
+                                    byte[] encodedBytes = new byte[readBufferPosition];
+                                    System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
+                                    final String data = new String(encodedBytes, "US-ASCII");
+                                    readBufferPosition = 0;
+
+                                    handler.post(new Runnable() {
+                                        public void run() {
+                                            Log.d(TAG, data);
+                                            //myLabel.setText(data);
+                                        }
+                                    });
+                                } else {
+                                    readBuffer[readBufferPosition++] = b;
+                                }
+                            }
+                        }
+                    } catch (IOException ex) {
+                        stopWorker = true;
+                    }
+                }
+            }
+        });
+
+        workerThread.start();
     }
 
     public String readFromDevice() throws IOException {
-        InputStream aStream = null;
-        InputStreamReader aReader = null;
-        String panStatus = null;
+        String data = null;
+        // TODO
+
+        return data;
+    }
+
+
+    public void sendToDevice(String data) {
+        data.concat(END_LINE);
         try {
-            aStream = mSocket.getInputStream();
-            aReader = new InputStreamReader(aStream);
-            mBufferedReader = new BufferedReader(aReader);
-
-            Log.d(TAG, "INI");
-//            while ((panStatus = mBufferedReader.readLine()) != null) {
-//                // TODO Modify the Pan Status
-//                Log.d(TAG, panStatus);
-//            }
-            panStatus = mBufferedReader.readLine();
-            Log.d(TAG, panStatus);
-            Log.d(TAG, "END");
+            mmOutputStream.write(data.getBytes());
         } catch (IOException e) {
-            Log.e(TAG, "Could not connect to device", e);
-            throw e;
-        } finally {
-            mSocket.close();
+            Log.e(TAG, e.getMessage());
         }
-
-        return panStatus;
     }
 }

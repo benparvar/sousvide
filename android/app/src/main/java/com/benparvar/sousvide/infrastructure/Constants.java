@@ -7,6 +7,7 @@ package com.benparvar.sousvide.infrastructure;
 public class Constants {
     public interface Bluetooth {
         public final int REQUEST_ENABLE_BT = 0;
+        public final String END_LINE = "\n";
     }
 
     public interface ErrorCode {
