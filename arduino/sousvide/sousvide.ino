@@ -7,7 +7,6 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <PID_v1.h>
-//#include <PID_AutoTune_v0.h>
 
 #define THERMOMETER_PIN 2
 #define HEATER_PIN 13
@@ -15,8 +14,11 @@
 
 boolean DEBUG = false;
 
-// Last
+// Last and Penultimate DATA
 String lastSendData = "";
+String penultimateSendData = "";
+
+String version = "1405201701";
 
 // STATUS
 String STS_OFF = "0";
@@ -91,6 +93,7 @@ DallasTemperature temperatureSensor(&ds18b20);
 void setup() {
   pinMode(HEATER_PIN, OUTPUT);
   swSerial.begin(9600); // this sets the the module to run at the default bound rate
+  sendData("Firmware designed by benparvar@gmail.com Version: " + version);
   initializePID();
 }
 
@@ -407,8 +410,13 @@ void sendError(String error) {
 */
 void sendData(String data) {
   if (lastSendData != data) {
-    swSerial.println(data);
-    lastSendData = data;
+    if (penultimateSendData != data) {
+      // Sending
+      swSerial.println(data);
+      // Rotating
+      penultimateSendData = lastSendData;
+      lastSendData = data;
+    }
   }
 }
 
