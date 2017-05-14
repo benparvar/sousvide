@@ -109,6 +109,7 @@ public class BluetoothBusiness extends BaseBusiness {
         // I changed the device
         if (!address.equals(mDeviceAddress)) {
             isListening = Boolean.FALSE;
+            mDeviceAddress = address;
         }
 
         BluetoothDevice aDevice = getDeviceByAddress(address);
