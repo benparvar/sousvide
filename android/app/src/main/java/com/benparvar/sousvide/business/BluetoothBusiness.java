@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.benparvar.sousvide.infrastructure.Constants;
 import com.benparvar.sousvide.ui.pan.PanActivity;
 
 import java.io.BufferedReader;
@@ -43,6 +44,8 @@ public class BluetoothBusiness extends BaseBusiness {
     private byte[] readBuffer;
     private int readBufferPosition;
     private Thread workerThread;
+    private Boolean isListening = Boolean.FALSE;
+    private String mDeviceAddress;
 
     public BluetoothBusiness(Context context) {
         super(context);
@@ -102,18 +105,25 @@ public class BluetoothBusiness extends BaseBusiness {
 
     public void openDeviceConnection(String address)
             throws IOException {
-        BluetoothDevice aDevice = getDeviceByAddress(address);
 
-        if (null == mSocket) {
-            mSocket = aDevice.createRfcommSocketToServiceRecord(UUID.fromString(UUID_SERIAL_PORT_PROFILE));
-            mSocket.connect();
+        // I changed the device
+        if (!address.equals(mDeviceAddress)) {
+            isListening = Boolean.FALSE;
         }
 
-        mmOutputStream = mSocket.getOutputStream();
-        mmInputStream = mSocket.getInputStream();
+        BluetoothDevice aDevice = getDeviceByAddress(address);
+        if (isListening.equals(Boolean.FALSE)) {
+            if (null == mSocket) {
+                mSocket = aDevice.createRfcommSocketToServiceRecord(UUID.fromString(UUID_SERIAL_PORT_PROFILE));
+                mSocket.connect();
+            }
 
-        // http://stackoverflow.com/questions/13450406/how-to-receive-serial-data-using-android-bluetooth
-        initializeListener();
+            mmOutputStream = mSocket.getOutputStream();
+            mmInputStream = mSocket.getInputStream();
+
+            initializeListener();
+            isListening = Boolean.TRUE;
+        }
 
     }
 
