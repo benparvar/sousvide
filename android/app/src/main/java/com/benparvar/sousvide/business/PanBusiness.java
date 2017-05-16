@@ -1,17 +1,13 @@
 package com.benparvar.sousvide.business;
 
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.util.Log;
 
 import com.benparvar.sousvide.entity.Pan;
-import com.benparvar.sousvide.entity.Temperature;
-import com.benparvar.sousvide.entity.Timer;
 import com.benparvar.sousvide.infrastructure.OperationResult;
 
 import java.io.IOException;
 
-import static com.benparvar.sousvide.R.string.no_paired_devices;
 import static com.benparvar.sousvide.infrastructure.Constants.ErrorCode.NO_PAIRED_DEVICES;
 import static com.benparvar.sousvide.infrastructure.Constants.ErrorCode.UNKNOWN;
 import static com.benparvar.sousvide.infrastructure.Constants.ErrorCode.YES_PAIRED_DEVICES;
@@ -25,10 +21,28 @@ public class PanBusiness extends BaseBusiness {
     private Pan mPam;
     private BluetoothBusiness mBluetoothBusiness;
 
+    // Listener
+    private PanBusinessReadListener listener;
+
     public PanBusiness(Context context) {
         super(context);
         this.mBluetoothBusiness = new BluetoothBusiness(context);
-        this.mPam = new Pan();
+        this.mPam = this.getNewPanInstance();
+
+        this.listener = null;
+
+        this.mBluetoothBusiness.setListener(new BluetoothBusiness.BluetoothBusinessReadListener() {
+            @Override
+            public void onReceiveData(String data) {
+                Log.d(TAG, data);
+
+               listener.onReceiveData(data);
+            }
+        });
+    }
+
+    public void setListener(PanBusinessReadListener listener) {
+        this.listener = listener;
     }
 
     public Pan getPanInstance() {
@@ -95,4 +109,8 @@ public class PanBusiness extends BaseBusiness {
         return result;
     }
 
+    // Listener Interface
+    public interface PanBusinessReadListener {
+        public void onReceiveData(String data);
+    }
 }

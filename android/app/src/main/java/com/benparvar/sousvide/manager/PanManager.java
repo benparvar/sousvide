@@ -36,6 +36,15 @@ public class PanManager extends BaseManager {
         // Business
         this.mBluetoothBusiness = new BluetoothBusiness(context);
         this.mPanBusiness = new PanBusiness(context);
+
+        this.mPanBusiness.setListener(new PanBusiness.PanBusinessReadListener() {
+            @Override
+            public void onReceiveData(String data) {
+                // TODO
+                Log.d(TAG, data);
+            }
+        });
+
         // Others
         this.mPam = this.mPanBusiness.getPanInstance();
     }

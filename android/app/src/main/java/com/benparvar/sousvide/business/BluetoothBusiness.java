@@ -4,21 +4,14 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.benparvar.sousvide.infrastructure.Constants;
-import com.benparvar.sousvide.ui.pan.PanActivity;
-
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +27,7 @@ import static com.benparvar.sousvide.infrastructure.Constants.ErrorCode.NO_PAIRE
  */
 
 public class BluetoothBusiness extends BaseBusiness {
+
     private final String TAG = "BluetoothBusiness";
     private BluetoothAdapter mBluetoothAdapter;
     private static final String UUID_SERIAL_PORT_PROFILE = "00001101-0000-1000-8000-00805F9B34FB";
@@ -47,9 +41,17 @@ public class BluetoothBusiness extends BaseBusiness {
     private Boolean isListening = Boolean.FALSE;
     private String mDeviceAddress;
 
+    // Listener
+    private BluetoothBusinessReadListener listener;
+
     public BluetoothBusiness(Context context) {
         super(context);
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        this.listener = null;
+    }
+
+    public void setListener(BluetoothBusinessReadListener listener) {
+        this.listener = listener;
     }
 
     public String getAddress() {
@@ -165,7 +167,7 @@ public class BluetoothBusiness extends BaseBusiness {
                                     handler.post(new Runnable() {
                                         public void run() {
                                             Log.d(TAG, data);
-                                            //myLabel.setText(data);
+                                            listener.onReceiveData(data);
                                         }
                                     });
                                 } else {
@@ -183,14 +185,6 @@ public class BluetoothBusiness extends BaseBusiness {
         workerThread.start();
     }
 
-    public String readFromDevice() throws IOException {
-        String data = null;
-        // TODO
-
-        return data;
-    }
-
-
     public void sendToDevice(String data) {
         data.concat(END_LINE);
         try {
@@ -198,5 +192,10 @@ public class BluetoothBusiness extends BaseBusiness {
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());
         }
+    }
+
+    // Listener Interface
+    public interface BluetoothBusinessReadListener {
+        public void onReceiveData(String data);
     }
 }
