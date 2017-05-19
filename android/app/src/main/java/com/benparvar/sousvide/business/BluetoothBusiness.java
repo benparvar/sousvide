@@ -59,7 +59,7 @@ public class BluetoothBusiness extends BaseBusiness {
     }
 
     public Boolean hasAdapter() {
-        return mBluetoothAdapter.getDefaultAdapter() != null ? Boolean.TRUE : Boolean.FALSE;
+        return BluetoothAdapter.getDefaultAdapter() != null ? Boolean.TRUE : Boolean.FALSE;
     }
 
     public void activate() {
@@ -166,7 +166,7 @@ public class BluetoothBusiness extends BaseBusiness {
 
                                     handler.post(new Runnable() {
                                         public void run() {
-                                            Log.d(TAG, data);
+                                            //Log.d(TAG, data);
                                             listener.onReceiveData(data);
                                         }
                                     });
@@ -196,6 +196,6 @@ public class BluetoothBusiness extends BaseBusiness {
 
     // Listener Interface
     public interface BluetoothBusinessReadListener {
-        public void onReceiveData(String data);
+        void onReceiveData(String data);
     }
 }

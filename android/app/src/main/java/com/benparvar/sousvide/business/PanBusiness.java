@@ -34,9 +34,9 @@ public class PanBusiness extends BaseBusiness {
         this.mBluetoothBusiness.setListener(new BluetoothBusiness.BluetoothBusinessReadListener() {
             @Override
             public void onReceiveData(String data) {
-                Log.d(TAG, data);
+                //Log.d(TAG, data);
 
-               listener.onReceiveData(data);
+                listener.onReceiveData(data);
             }
         });
     }
@@ -101,7 +101,7 @@ public class PanBusiness extends BaseBusiness {
             try {
                 mBluetoothBusiness.openDeviceConnection(mPam.getAddress());
             } catch (IOException e) {
-               Log.e(TAG, e.getMessage());
+                Log.e(TAG, e.getMessage());
             }
         }
 
@@ -111,6 +111,6 @@ public class PanBusiness extends BaseBusiness {
 
     // Listener Interface
     public interface PanBusinessReadListener {
-        public void onReceiveData(String data);
+        void onReceiveData(String data);
     }
 }

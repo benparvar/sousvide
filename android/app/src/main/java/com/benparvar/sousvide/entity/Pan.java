@@ -9,6 +9,7 @@ public class Pan {
     private Boolean working;
     private Temperature temperature;
     private Timer timer;
+    private String status;
 
     public Pan() {
         super();
@@ -30,6 +31,14 @@ public class Pan {
         this.address = address;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "Pan{" +
@@ -37,6 +46,7 @@ public class Pan {
                 ", working=" + working +
                 ", temperature=" + temperature +
                 ", timer=" + timer +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

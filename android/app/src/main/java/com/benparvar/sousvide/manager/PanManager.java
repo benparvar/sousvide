@@ -4,21 +4,17 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
 
 import com.benparvar.sousvide.R;
 import com.benparvar.sousvide.business.BluetoothBusiness;
+import com.benparvar.sousvide.business.CommandBusiness;
 import com.benparvar.sousvide.business.PanBusiness;
 import com.benparvar.sousvide.entity.Pan;
-import com.benparvar.sousvide.entity.Status;
-import com.benparvar.sousvide.infrastructure.Constants;
 import com.benparvar.sousvide.infrastructure.OperationListener;
 import com.benparvar.sousvide.infrastructure.OperationResult;
 
 import java.util.List;
-import java.util.Set;
 
-import static com.benparvar.sousvide.R.string.no_paired_devices;
 import static com.benparvar.sousvide.infrastructure.Constants.ErrorCode.NO_ERROR;
 
 /**
@@ -29,6 +25,7 @@ public class PanManager extends BaseManager {
     private final String TAG = "PanManager";
     private BluetoothBusiness mBluetoothBusiness;
     private PanBusiness mPanBusiness;
+    private CommandBusiness mCommandBusiness;
     private Pan mPam;
 
     public PanManager(Context context) {
@@ -36,12 +33,13 @@ public class PanManager extends BaseManager {
         // Business
         this.mBluetoothBusiness = new BluetoothBusiness(context);
         this.mPanBusiness = new PanBusiness(context);
+        this.mCommandBusiness = new CommandBusiness(context);
 
         this.mPanBusiness.setListener(new PanBusiness.PanBusinessReadListener() {
             @Override
             public void onReceiveData(String data) {
-                // TODO
-                Log.d(TAG, data);
+                mPam = mCommandBusiness.parse(mPam, data);
+                //Log.d(TAG, data);
             }
         });
 
