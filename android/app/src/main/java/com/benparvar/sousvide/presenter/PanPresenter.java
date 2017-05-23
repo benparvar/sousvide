@@ -113,14 +113,14 @@ public class PanPresenter extends BasePresenter {
         }
     }
 
-    public Long minuteToMilliSecond(Long sc) {
-        return sc * 1000 * 60;
+    public Long minuteToSecond(Long sc) {
+        return sc * 60;
     }
 
-    public String miliSecondToStringHour(Long ms) {
+    public String secondToStringHour(Long ms) {
         String value = "00:00";
         try {
-            value = String.format("%02d:%02d", ms / 3600000, (ms / 60000) % 60);
+            value = String.format("%02d:%02d", ms / 3600, (ms / 60) % 60);
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -139,10 +139,10 @@ public class PanPresenter extends BasePresenter {
         return value;
     }
 
-    public Long stringHourToMiliSecond(String hour) {
+    public Long stringHourToSecond(String hour) {
         String[] hourSlited = hour.split(":");
-        Long result = result = Long.valueOf(hourSlited[0]) * 60 * 60 * 1000;
-        result += Long.valueOf(hourSlited[1]) * 60 * 1000;
+        Long result = result = Long.valueOf(hourSlited[0]) * 60 * 60;
+        result += Long.valueOf(hourSlited[1]) * 60;
 
         return result;
     }
@@ -160,7 +160,7 @@ public class PanPresenter extends BasePresenter {
         List<BluetoothDevice> devices = this.getPairedBluetoothDevices();
 
         if (CollectionUtils.isEmpty(devices)) {
-            mActivity.updateBtnPanStatus(R.color.panDisconnected, Boolean.FALSE);
+            mActivity.updateBtnPanStatus(R.color.panDisconnected, Boolean.TRUE);
         } else {
             mActivity.updateBtnPanStatus(R.color.panConnected, Boolean.TRUE);
         }
@@ -203,20 +203,22 @@ public class PanPresenter extends BasePresenter {
                         // Nothing...
                         break;
                     case PAN_TIMER_TARGET:
-                        // TODO
-                        mPan.setTimer(null);
+                        mActivity.setTargetTimer(Long.valueOf(preParsedString.get(index++)));
                         break;
                     case PAN_TEMPERATURE_TARGET:
-                        // TODO
-                        mPan.setTemperature(null);
+                        // PAN:S:005:6000
+                        mActivity.setTargetTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
                         break;
                     case PAN_CURRENT_TIMER:
                         mPan.setTimer(Long.valueOf(preParsedString.get(index++)));
+                        mActivity.setTargetTimer(Long.valueOf(preParsedString.get(index++)));
                         break;
                     case PAN_CURRENT_TEMPERATURE:
                         mPan.setTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
+                        mActivity.setTargetTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
                         break;
                     case PAN_READY:
+                        mPan.setStatus(STS_READY);
                         mActivity.updateBtnPanStatus(R.color.panReady, Boolean.TRUE);
                         break;
                     case PAN_COOK_IN_PROGRESS:
@@ -246,8 +248,8 @@ public class PanPresenter extends BasePresenter {
         Log.d(TAG, mPan.toString());
 
 
-        mActivity.setCurrentTempeature(mPan.getTemperature());
-        mActivity.updateCurrentTimer(mPan.getTimer());
+        mActivity.setCurrentTemperature(mPan.getTemperature());
+        mActivity.setCurrentTimer(mPan.getTimer());
         //mActivity.updateStatus(mPan.getStatus());
     }
 
@@ -256,9 +258,9 @@ public class PanPresenter extends BasePresenter {
      * @param targetTemperature
      */
     public void setTargetTemperature(Double targetTemperature) {
-        // PAN:V:003:4000
-        String data = HEADER + SEPARATOR + VERB + PAN_TEMPERATURE + SEPARATOR + targetTemperature.
-                toString().replace(".", "");
+        // PAN:V:003:4000 3000 -> 4000
+        String data = HEADER + SEPARATOR + VERB + SEPARATOR + PAN_TEMPERATURE + SEPARATOR + targetTemperature.
+                toString().replace(".", "0");
         this.sendToBluetoothDevice(data);
     }
 
@@ -268,7 +270,7 @@ public class PanPresenter extends BasePresenter {
      */
     public void setTargetTimer(Long targetTimer) {
         // PAN:V:002:600
-        String data = HEADER + SEPARATOR + VERB + PAN_TIMER + SEPARATOR + targetTimer.toString().
+        String data = HEADER + SEPARATOR + VERB + SEPARATOR + PAN_TIMER + SEPARATOR + targetTimer.toString().
                 replace(".", "");
         this.sendToBluetoothDevice(data);
     }
@@ -423,7 +425,7 @@ public class PanPresenter extends BasePresenter {
         data.concat(END_LINE);
         try {
             mmOutputStream.write(data.getBytes());
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
     }

@@ -7,7 +7,7 @@ Bluetooth Sousvide project
 XXX:Y:000:111111
 
 XXX -> Header
-Y 	-> Command 
+Y 	-> Command
 000 -> Number
 111111 -> Value
 
@@ -15,8 +15,8 @@ Y 	-> Command
 Should always be "PAN"
 
 ** COMMAND **
-V Input 
-S Output 
+V Input
+S Output
 
 ** NUMBER **
 000 Turn off the heater
@@ -34,8 +34,8 @@ S Output
 
 PAN:V:000		Turn off the heater
 PAN:V:001		Turn on the heater
-PAN:V:002:0000	Set the heater timmer
-PAN:V:003:0000	Set the heater temperature 
+PAN:V:002:0000	Set the heater timmer in seconds
+PAN:V:003:0000	Set the heater temperature
 
 * Output Examples *
 
@@ -45,9 +45,5 @@ PAN:S:007:3906:7000	Current temperature is 39.06 (C), the target is 70.00 (C)
 * Examples
 PAN:V:000
 PAN:V:003:4000
-PAN:V:002:600
+PAN:V:002:600 (600 seconds)
 PAN:V:001
-
-
-
-

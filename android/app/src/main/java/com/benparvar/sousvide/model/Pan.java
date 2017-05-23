@@ -11,6 +11,12 @@ public class Pan {
     private Double temperature;
     private Long timer;
 
+    public Pan() {
+        this.status = "";
+        this.temperature = 0.0;
+        this.timer = 0L;
+    }
+
     public String getStatus() {
         return status;
     }

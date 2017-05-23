@@ -12,8 +12,8 @@ public class Contants {
     }
 
     public interface Timer {
-        public Long MIN_TARGET_TIMER_IN_MILLISECONDS = 60000L;
-        public Long MAX_TARGET_TIMER_IN_MILLISECONDS = 356400000L;
+        public Long MIN_TARGET_TIMER_IN_SECONDS = 0L;
+        public Long MAX_TARGET_TIMER_IN_SECONDS = 86400L;
     }
 
     public interface TimTemperatureer {

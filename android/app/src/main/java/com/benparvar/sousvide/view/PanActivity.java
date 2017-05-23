@@ -24,14 +24,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.benparvar.sousvide.infrastructure.Contants.PanStatus.STS_COOK_FINISHED;
-import static com.benparvar.sousvide.infrastructure.Contants.PanStatus.STS_COOK_IN_PROGRESS;
-import static com.benparvar.sousvide.infrastructure.Contants.PanStatus.STS_OFF;
-import static com.benparvar.sousvide.infrastructure.Contants.PanStatus.STS_READY;
 import static com.benparvar.sousvide.infrastructure.Contants.TimTemperatureer.MAX_TARGET_TEMPERATURE;
 import static com.benparvar.sousvide.infrastructure.Contants.TimTemperatureer.MIN_TARGET_TEMPERATURE;
-import static com.benparvar.sousvide.infrastructure.Contants.Timer.MAX_TARGET_TIMER_IN_MILLISECONDS;
-import static com.benparvar.sousvide.infrastructure.Contants.Timer.MIN_TARGET_TIMER_IN_MILLISECONDS;
+import static com.benparvar.sousvide.infrastructure.Contants.Timer.MAX_TARGET_TIMER_IN_SECONDS;
+import static com.benparvar.sousvide.infrastructure.Contants.Timer.MIN_TARGET_TIMER_IN_SECONDS;
 
 public class PanActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private final String TAG = "PanActivity";
@@ -72,8 +68,7 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
 
         mPanPresenter = new PanPresenter(this);
 
-        //updateStatus(null);
-        this.updateBtnPanStatus(R.color.panDisconnected, Boolean.FALSE);
+        this.updateBtnPanStatus(R.color.panDisconnected, Boolean.TRUE);
 
         mPanPresenter.configureBluetooh();
         mPanPresenter.configureSpinnerDevices();
@@ -85,7 +80,7 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
 
         InputTO mInputTO = new InputTO(deviceAddress,
                 Double.valueOf(this.tvwTargetTemperature.getText().toString()),
-                mPanPresenter.stringHourToMiliSecond(this.tvwTargetTimer.getText().toString()));
+                mPanPresenter.stringHourToSecond(this.tvwTargetTimer.getText().toString()));
 
         mPanPresenter.onClickBtnPan(mInputTO);
 
@@ -147,18 +142,18 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
                 .setView(inputText)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Long longValue = mPanPresenter.minuteToMilliSecond(Long.valueOf(inputText.
+                        Long longValue = mPanPresenter.minuteToSecond(Long.valueOf(inputText.
                                 getText().toString()));
 
-                        if (longValue > MAX_TARGET_TIMER_IN_MILLISECONDS ||
-                                longValue < MIN_TARGET_TIMER_IN_MILLISECONDS) {
+                        if (longValue > MAX_TARGET_TIMER_IN_SECONDS ||
+                                longValue < MIN_TARGET_TIMER_IN_SECONDS) {
                             Toast.makeText(getApplicationContext(), "Invalid timer",
                                     Toast.LENGTH_SHORT).show();
                         } else {
                             targetTimer = longValue;
                             mPanPresenter.setTargetTimer(targetTimer);
                             tvwTargetTimer.setText(mPanPresenter.
-                                    miliSecondToStringHour(targetTimer));
+                                    secondToStringHour(targetTimer));
                         }
 
                     }
@@ -200,30 +195,25 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
         Log.d(TAG, "deviceAddress: " + deviceAddress);
     }
 
-//    public void updateStatus(String status) {
-//        if (STS_OFF.equals(status)) {
-//            mButtonPan.setBackgroundColor(getResources().getColor(R.color.panOff));
-//        } else if (STS_READY.equals(status)) {
-//            mButtonPan.setBackgroundColor(getResources().getColor(R.color.panOn));
-//        } else if (STS_COOK_IN_PROGRESS.equals(status)) {
-//            mButtonPan.setBackgroundColor(getResources().getColor(R.color.panCooking));
-//        } else if (STS_COOK_FINISHED.equals(status)) {
-//            mButtonPan.setBackgroundColor(getResources().getColor(R.color.panCooking));
-//        } else {
-//            mButtonPan.setBackgroundColor(getResources().getColor(R.color.panDisconnected));
-//        }
-//    }
-
-    public void updateCurrentTimer(Long timer) {
-        tvwCurrentTimer.setText(mPanPresenter.miliSecondToStringHour(timer));
+    public void setCurrentTimer(Long timer) {
+        tvwCurrentTimer.setText(mPanPresenter.secondToStringHour(timer));
     }
 
-    public void setCurrentTempeature(Double temperature) {
+    public void setCurrentTemperature(Double temperature) {
         tvwCurrentTemperature.setText(mPanPresenter.doubleToTemperature(temperature));
     }
 
+    public void setTargetTemperature(Double temperature) {
+        tvwTargetTemperature.setText(mPanPresenter.doubleToTemperature(temperature));
+    }
+
     public void updateBtnPanStatus(int color, Boolean enabled) {
-        mButtonPan.setBackgroundColor(color);
+        mButtonPan.setBackgroundColor(color); //getResources().getColor(int color);
         mButtonPan.setEnabled(enabled);
+        mButtonPan.refreshDrawableState();
+    }
+
+    public void setTargetTimer(Long timer) {
+        tvwTargetTimer.setText(mPanPresenter.secondToStringHour(timer));
     }
 }
