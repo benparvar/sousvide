@@ -18,7 +18,7 @@ boolean DEBUG = false;
 String lastSendData = "";
 String penultimateSendData = "";
 
-String version = "1405201701";
+String version = "2305201701";
 
 // STATUS
 String STS_OFF = "0";
@@ -46,6 +46,7 @@ String PAN_READY = "008";
 String PAN_COOK_IN_PROGRESS = "009";
 String PAN_COOK_FINISHED = "010";
 String PID_VALUE = "011";
+String PAN_VERSION = "012"
 
 // ERROR CODE
 String INVALID_HEADER = "900";
@@ -75,7 +76,7 @@ double targetTemperature = 0;
 int MIN_TEMPERATURE = 3000;
 int MAX_TEMPERATURE = 6000;
 
-// TIMER (MILI SECONDS)
+// TIMER LIMITS (SECONDS)
 long MIN_TIMER = 0;
 long MAX_TIMER = 86400; // A day
 
@@ -93,8 +94,20 @@ DallasTemperature temperatureSensor(&ds18b20);
 void setup() {
   pinMode(HEATER_PIN, OUTPUT);
   swSerial.begin(9600); // this sets the the module to run at the default bound rate
-  sendData("Firmware designed by benparvar@gmail.com Version: " + version);
+  sendData("Firmware designed by benparvar@gmail.com");
   initializePID();
+}
+
+void readFirmwareVersion() {
+    //PAN FIRMWARE VERSION -> "PAN:S:012:00000000"
+    String data = HEADER;
+    data.concat(SEPARATOR);
+    data.concat(STATUS);
+    data.concat(SEPARATOR);
+    data.concat(PAN_VERSION);
+    data.concat(SEPARATOR);
+    data.concat(version);
+    sendData(data);
 }
 
 /**
@@ -299,13 +312,6 @@ void initializePID() {
 void calculatePID() {
   double delta = (targetTemperature - currentTemperature) / 100;
 
-  //  swSerial.print("tar : ");
-  //  swSerial.println(targetTemperature / 100);
-  //  swSerial.print("cur : ");
-  //  swSerial.println(currentTemperature / 100);
-  //  swSerial.print("del : ");
-  //  swSerial.println(delta);
-
   // Limit the resistor block using PWM since the heating is precise
   if (delta > 8) {
     PIDCalculation.SetOutputLimits(0, 255);
@@ -381,6 +387,11 @@ void receiveData() {
           inData = inData.substring(4, inData.length());
           sendDebug("Noun Data", inData);
           setTemperature(inData);
+        }
+
+        // firmware version
+        if (inData.substring(0, 3) == PAN_VERSION) {
+          readFirmwareVersion();
         }
 
       } else {
