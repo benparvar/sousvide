@@ -49,7 +49,9 @@ import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PAN_TEMPERA
 import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PAN_TEMPERATURE_TARGET;
 import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PAN_TIMER;
 import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PAN_TIMER_TARGET;
+import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PAN_VERSION;
 import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PID_VALUE;
+import static com.benparvar.sousvide.infrastructure.Contants.Timer.MIN_TARGET_TIMER_IN_SECONDS;
 
 /**
  * Created by alans on 19/05/17.
@@ -189,10 +191,12 @@ public class PanPresenter extends BasePresenter {
                 string = preParsedString.get(index++);
                 switch (string) {
                     case PAN_OFF:
+                        //PAN OFF -> "PAN:S:000"
                         mPan.setStatus(STS_OFF);
                         mActivity.updateBtnPanStatus(R.color.panOff, Boolean.TRUE);
                         break;
                     case PAN_ON:
+                        //PAN ON -> "PAN:S:001"
                         mPan.setStatus(STS_READY);
                         mActivity.updateBtnPanStatus(R.color.panOn, Boolean.TRUE);
                         break;
@@ -203,17 +207,20 @@ public class PanPresenter extends BasePresenter {
                         // Nothing...
                         break;
                     case PAN_TIMER_TARGET:
+                        //PAN TIMER -> "PAN:S:004:00000"
                         mActivity.setTargetTimer(Long.valueOf(preParsedString.get(index++)));
                         break;
                     case PAN_TEMPERATURE_TARGET:
-                        // PAN:S:005:6000
+                        //PAN TEMPERATURE -> "PAN:S:005:00000"
                         mActivity.setTargetTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
                         break;
                     case PAN_CURRENT_TIMER:
+                        //PAN CURRENT TIMER -> "PAN:S:006:0000:0000"
                         mPan.setTimer(Long.valueOf(preParsedString.get(index++)));
                         mActivity.setTargetTimer(Long.valueOf(preParsedString.get(index++)));
                         break;
                     case PAN_CURRENT_TEMPERATURE:
+                        //PAN CURRENT TEMPERATURE -> "PAN:S:007:0000:0000"
                         mPan.setTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
                         mActivity.setTargetTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
                         break;
@@ -230,6 +237,12 @@ public class PanPresenter extends BasePresenter {
                         mActivity.updateBtnPanStatus(R.color.panCooked, Boolean.TRUE);
                         break;
                     case PID_VALUE:
+                        //PAN PID -> "PAN:S:011:00000"
+                        Log.v(TAG, "PID value: " + preParsedString.get(index++));
+                        break;
+                    case PAN_VERSION:
+                        //PAN FIRMWARE VERSION -> "PAN:S:012:00000000"
+                        Log.v(TAG, "Firmware version: " + preParsedString.get(index++));
                         break;
                 }
             } else {
@@ -247,10 +260,8 @@ public class PanPresenter extends BasePresenter {
         // Update UI
         Log.d(TAG, mPan.toString());
 
-
         mActivity.setCurrentTemperature(mPan.getTemperature());
         mActivity.setCurrentTimer(mPan.getTimer());
-        //mActivity.updateStatus(mPan.getStatus());
     }
 
     /**

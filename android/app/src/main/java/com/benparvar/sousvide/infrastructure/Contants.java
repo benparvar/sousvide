@@ -61,6 +61,7 @@ public class Contants {
         public final String PAN_COOK_IN_PROGRESS = "009";
         public final String PAN_COOK_FINISHED = "010";
         public final String PID_VALUE = "011";
+        public final String PAN_VERSION = "012";
     }
 
     // ERROR CODE

@@ -1,6 +1,7 @@
 /**
     Bluetooth sousvide v1.0
     by benparvar@gmail.com
+    please install the libraries OneWire, DallasTemperature e PIDLibrary
 */
 
 #include <SoftwareSerial.h>
@@ -46,7 +47,7 @@ String PAN_READY = "008";
 String PAN_COOK_IN_PROGRESS = "009";
 String PAN_COOK_FINISHED = "010";
 String PID_VALUE = "011";
-String PAN_VERSION = "012"
+String PAN_VERSION = "012";
 
 // ERROR CODE
 String INVALID_HEADER = "900";
@@ -213,6 +214,7 @@ void cookOn() {
   } else if (panStatus == STS_READY) {
     panStatus = STS_COOK_IN_PROGRESS;
     digitalWrite(HEATER_PIN, HIGH);
+    
     //PAN ON -> "PAN:S:001"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -232,6 +234,7 @@ void cookOff() {
   } else if (panStatus == STS_COOK_IN_PROGRESS || panStatus == STS_COOK_FINISHED) {
     digitalWrite(HEATER_PIN, LOW);
     reset();
+    
     //PAN OFF -> "PAN:S:000"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -255,6 +258,7 @@ void setTimer(String timer) {
   } else {
     targetTimer = tim;
     verifyProgram();
+    
     //PAN TIMER -> "PAN:S:004:00000"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -280,6 +284,7 @@ void setTemperature(String temperature) {
   } else {
     targetTemperature = temper;
     verifyProgram();
+    
     //PAN TEMPERATURE -> "PAN:S:005:00000"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -332,6 +337,7 @@ void calculatePID() {
   // Compute the PID calculation
   PIDCalculation.Compute();
 
+  //PAN PID -> "PAN:S:011:00000"
   if (panStatus == STS_COOK_IN_PROGRESS && DEBUG) {
     String data = HEADER;
     data.concat(SEPARATOR);

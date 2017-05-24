@@ -2,6 +2,7 @@ package com.benparvar.sousvide.view;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.InputType;
@@ -208,9 +209,12 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
     }
 
     public void updateBtnPanStatus(int color, Boolean enabled) {
-        mButtonPan.setBackgroundColor(color); //getResources().getColor(int color);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mButtonPan.setBackgroundColor(getResources().getColor(color, this.getTheme()));
+        } else {
+            mButtonPan.setBackgroundColor(getResources().getColor(color));
+        }
         mButtonPan.setEnabled(enabled);
-        mButtonPan.refreshDrawableState();
     }
 
     public void setTargetTimer(Long timer) {
