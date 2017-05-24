@@ -1,13 +1,13 @@
 /**
     Bluetooth sousvide v1.0
     by benparvar@gmail.com
+    please install the libraries OneWire, DallasTemperature e PIDLibrary
 */
 
 #include <SoftwareSerial.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <PID_v1.h>
-//#include <PID_AutoTune_v0.h>
 
 #define THERMOMETER_PIN 2
 #define HEATER_PIN 13
@@ -15,8 +15,11 @@
 
 boolean DEBUG = false;
 
-// Last
+// Last and Penultimate DATA
 String lastSendData = "";
+String penultimateSendData = "";
+
+String version = "2305201701";
 
 // STATUS
 String STS_OFF = "0";
@@ -44,6 +47,7 @@ String PAN_READY = "008";
 String PAN_COOK_IN_PROGRESS = "009";
 String PAN_COOK_FINISHED = "010";
 String PID_VALUE = "011";
+String PAN_VERSION = "012";
 
 // ERROR CODE
 String INVALID_HEADER = "900";
@@ -73,7 +77,7 @@ double targetTemperature = 0;
 int MIN_TEMPERATURE = 3000;
 int MAX_TEMPERATURE = 6000;
 
-// TIMER (MILI SECONDS)
+// TIMER LIMITS (SECONDS)
 long MIN_TIMER = 0;
 long MAX_TIMER = 86400; // A day
 
@@ -91,7 +95,20 @@ DallasTemperature temperatureSensor(&ds18b20);
 void setup() {
   pinMode(HEATER_PIN, OUTPUT);
   swSerial.begin(9600); // this sets the the module to run at the default bound rate
+  sendData("Firmware designed by benparvar@gmail.com");
   initializePID();
+}
+
+void readFirmwareVersion() {
+    //PAN FIRMWARE VERSION -> "PAN:S:012:00000000"
+    String data = HEADER;
+    data.concat(SEPARATOR);
+    data.concat(STATUS);
+    data.concat(SEPARATOR);
+    data.concat(PAN_VERSION);
+    data.concat(SEPARATOR);
+    data.concat(version);
+    sendData(data);
 }
 
 /**
@@ -197,6 +214,7 @@ void cookOn() {
   } else if (panStatus == STS_READY) {
     panStatus = STS_COOK_IN_PROGRESS;
     digitalWrite(HEATER_PIN, HIGH);
+    
     //PAN ON -> "PAN:S:001"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -216,6 +234,7 @@ void cookOff() {
   } else if (panStatus == STS_COOK_IN_PROGRESS || panStatus == STS_COOK_FINISHED) {
     digitalWrite(HEATER_PIN, LOW);
     reset();
+    
     //PAN OFF -> "PAN:S:000"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -239,6 +258,7 @@ void setTimer(String timer) {
   } else {
     targetTimer = tim;
     verifyProgram();
+    
     //PAN TIMER -> "PAN:S:004:00000"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -264,6 +284,7 @@ void setTemperature(String temperature) {
   } else {
     targetTemperature = temper;
     verifyProgram();
+    
     //PAN TEMPERATURE -> "PAN:S:005:00000"
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -296,13 +317,6 @@ void initializePID() {
 void calculatePID() {
   double delta = (targetTemperature - currentTemperature) / 100;
 
-  //  swSerial.print("tar : ");
-  //  swSerial.println(targetTemperature / 100);
-  //  swSerial.print("cur : ");
-  //  swSerial.println(currentTemperature / 100);
-  //  swSerial.print("del : ");
-  //  swSerial.println(delta);
-
   // Limit the resistor block using PWM since the heating is precise
   if (delta > 8) {
     PIDCalculation.SetOutputLimits(0, 255);
@@ -323,6 +337,7 @@ void calculatePID() {
   // Compute the PID calculation
   PIDCalculation.Compute();
 
+  //PAN PID -> "PAN:S:011:00000"
   if (panStatus == STS_COOK_IN_PROGRESS && DEBUG) {
     String data = HEADER;
     data.concat(SEPARATOR);
@@ -380,6 +395,11 @@ void receiveData() {
           setTemperature(inData);
         }
 
+        // firmware version
+        if (inData.substring(0, 3) == PAN_VERSION) {
+          readFirmwareVersion();
+        }
+
       } else {
         sendDebug("Verb invalid", inData);
         sendError(INVALID_VERB);
@@ -407,8 +427,13 @@ void sendError(String error) {
 */
 void sendData(String data) {
   if (lastSendData != data) {
-    swSerial.println(data);
-    lastSendData = data;
+    if (penultimateSendData != data) {
+      // Sending
+      swSerial.println(data);
+      // Rotating
+      penultimateSendData = lastSendData;
+      lastSendData = data;
+    }
   }
 }
 
