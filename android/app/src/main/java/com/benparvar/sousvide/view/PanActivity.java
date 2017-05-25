@@ -205,6 +205,7 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
     }
 
     public void setTargetTemperature(Double temperature) {
+        Log.d(TAG, "setTargetTemperature: " + temperature);
         tvwTargetTemperature.setText(mPanPresenter.doubleToTemperature(temperature));
     }
 
@@ -218,6 +219,7 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
     }
 
     public void setTargetTimer(Long timer) {
+        Log.d(TAG, "setTargetTimer: " + timer);
         tvwTargetTimer.setText(mPanPresenter.secondToStringHour(timer));
     }
 }

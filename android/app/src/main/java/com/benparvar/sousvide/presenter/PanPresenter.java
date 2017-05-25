@@ -10,6 +10,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 
 import com.benparvar.sousvide.R;
+import com.benparvar.sousvide.infrastructure.Contants;
 import com.benparvar.sousvide.model.InputTO;
 import com.benparvar.sousvide.model.Pan;
 import com.benparvar.sousvide.view.PanActivity;
@@ -28,12 +29,14 @@ import java.util.UUID;
 import static com.benparvar.sousvide.infrastructure.Contants.Bluetooth.END_LINE;
 import static com.benparvar.sousvide.infrastructure.Contants.Bluetooth.LINE_FEED;
 import static com.benparvar.sousvide.infrastructure.Contants.Bluetooth.REQUEST_ENABLE_BT;
+import static com.benparvar.sousvide.infrastructure.Contants.ErrorCode.INVALID_TEMPERATURE;
 import static com.benparvar.sousvide.infrastructure.Contants.ErrorCode.NO_BLUETOOTH_ADAPTER;
 import static com.benparvar.sousvide.infrastructure.Contants.ErrorCode.NO_PAIRED_DEVICES;
 import static com.benparvar.sousvide.infrastructure.Contants.PanCommand.HEADER;
 import static com.benparvar.sousvide.infrastructure.Contants.PanCommand.SEPARATOR;
 import static com.benparvar.sousvide.infrastructure.Contants.PanCommand.STATUS;
 import static com.benparvar.sousvide.infrastructure.Contants.PanCommand.VERB;
+import static com.benparvar.sousvide.infrastructure.Contants.PanErrorCode.INVALID_TEMPERATURE_TARGET;
 import static com.benparvar.sousvide.infrastructure.Contants.PanStatus.STS_COOK_FINISHED;
 import static com.benparvar.sousvide.infrastructure.Contants.PanStatus.STS_COOK_IN_PROGRESS;
 import static com.benparvar.sousvide.infrastructure.Contants.PanStatus.STS_OFF;
@@ -208,21 +211,21 @@ public class PanPresenter extends BasePresenter {
                         break;
                     case PAN_TIMER_TARGET:
                         //PAN TIMER -> "PAN:S:004:00000"
-                        mActivity.setTargetTimer(Long.valueOf(preParsedString.get(index++)));
+                        mActivity.setTargetTimer(this.strToTimer(preParsedString.get(index++)));
                         break;
                     case PAN_TEMPERATURE_TARGET:
                         //PAN TEMPERATURE -> "PAN:S:005:00000"
-                        mActivity.setTargetTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
+                        mActivity.setTargetTemperature(this.strToTemperature(preParsedString.get(index++)));
                         break;
                     case PAN_CURRENT_TIMER:
                         //PAN CURRENT TIMER -> "PAN:S:006:0000:0000"
-                        mPan.setTimer(Long.valueOf(preParsedString.get(index++)));
-                        mActivity.setTargetTimer(Long.valueOf(preParsedString.get(index++)));
+                        mPan.setTimer(this.strToTimer(preParsedString.get(index++)));
+                        mActivity.setTargetTimer(this.strToTimer(preParsedString.get(index++)));
                         break;
                     case PAN_CURRENT_TEMPERATURE:
                         //PAN CURRENT TEMPERATURE -> "PAN:S:007:0000:0000"
-                        mPan.setTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
-                        mActivity.setTargetTemperature(Double.valueOf(preParsedString.get(index++)) / 100);
+                        mPan.setTemperature(this.strToTemperature(preParsedString.get(index++)));
+                        mActivity.setTargetTemperature(this.strToTemperature(preParsedString.get(index++)));
                         break;
                     case PAN_READY:
                         mPan.setStatus(STS_READY);
@@ -244,6 +247,9 @@ public class PanPresenter extends BasePresenter {
                         //PAN FIRMWARE VERSION -> "PAN:S:012:00000000"
                         Log.v(TAG, "Firmware version: " + preParsedString.get(index++));
                         break;
+                    case INVALID_TEMPERATURE_TARGET:
+                        showError(INVALID_TEMPERATURE);
+                        break;
                 }
             } else {
                 error = Boolean.TRUE;
@@ -262,6 +268,28 @@ public class PanPresenter extends BasePresenter {
 
         mActivity.setCurrentTemperature(mPan.getTemperature());
         mActivity.setCurrentTimer(mPan.getTimer());
+    }
+
+    private Double strToTemperature(String value) {
+        Double result = 0.0;
+        try {
+            result =  Double.valueOf(value) / 100;
+        } catch (NumberFormatException e) {
+          Log.e(TAG, e.getMessage());
+        }
+
+        return result;
+    }
+
+    private Long strToTimer(String value) {
+        Long result = 0L;
+        try {
+            result = Long.valueOf(value);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, e.getMessage());
+        }
+
+        return result;
     }
 
     /**
