@@ -108,8 +108,13 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
                 .setView(inputText)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Double doubleValue = Double.valueOf(inputText.getText().toString());
-
+                        Double doubleValue = 0.0;
+                        try {
+                            doubleValue = Double.valueOf(inputText.getText().toString());
+                        } catch (NumberFormatException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+  
                         if (doubleValue > MAX_TARGET_TEMPERATURE ||
                                 doubleValue < MIN_TARGET_TEMPERATURE) {
 
@@ -143,8 +148,14 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
                 .setView(inputText)
                 .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        Long longValue = mPanPresenter.minuteToSecond(Long.valueOf(inputText.
-                                getText().toString()));
+                        Long longValue = 0L;
+                        try {
+                            longValue = mPanPresenter.minuteToSecond(Long.valueOf(inputText.
+                                    getText().toString()));
+                        } catch (NumberFormatException e) {
+                            Log.e(TAG, e.getMessage());
+                        }
+
 
                         if (longValue > MAX_TARGET_TIMER_IN_SECONDS ||
                                 longValue < MIN_TARGET_TIMER_IN_SECONDS) {

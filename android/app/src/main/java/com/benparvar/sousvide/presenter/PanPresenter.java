@@ -175,7 +175,7 @@ public class PanPresenter extends BasePresenter {
     }
 
     private void onReceiveData(String data) {
-        //Log.d(TAG, data);
+        Log.d(TAG, data);
         Boolean error = Boolean.FALSE;
         String string = "";
         int index = 0;
