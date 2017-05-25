@@ -12,6 +12,10 @@
     <string name="no_paired_devices">No paired devices</string>
     <string name="yes_paired_devices">Yes paired devices</string>
     <string name="no_bluetooth_adapter">No bluetooth adapter</string>
+    <string name="invalid_temperature">Invalid Temperature</string>
+    <string name="pan_off">Pan off</string>
+    <string name="pan_on">Pan on</string>
+    <string name="pan_ready">Pan ready</string>
     <!-- Error End -->
 
     <string name="cancel">Cancel</string>
