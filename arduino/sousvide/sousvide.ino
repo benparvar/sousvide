@@ -19,7 +19,7 @@ boolean DEBUG = false;
 String lastSendData = "";
 String penultimateSendData = "";
 
-String version = "2305201701";
+String version = "2505201701";
 
 // STATUS
 String STS_OFF = "0";
@@ -33,6 +33,7 @@ String SEPARATOR = ":";
 String VERB = "V";
 String NOUN = "N";
 String STATUS = "S";
+String END = SEPARATOR;
 
 // VERB
 String PAN_OFF = "000";
@@ -108,7 +109,7 @@ void readFirmwareVersion() {
     data.concat(PAN_VERSION);
     data.concat(SEPARATOR);
     data.concat(version);
-    data.concat(SEPARATOR);
+    data.concat(END);
     sendData(data);
 }
 
@@ -132,14 +133,14 @@ void readCurrentTemperature() {
     data.concat(currentTemperature);
     data.concat(SEPARATOR);
     data.concat(targetTemperature);
-    data.concat(SEPARATOR);
+    data.concat(END);
     sendData(data);
   }
 }
 
 void readCurrentTimer() {
   if (panStatus == STS_COOK_IN_PROGRESS) {
-    if (countTimer()) {
+    if ( countTimer()) {
       currentTimer++;
     }
 
@@ -158,7 +159,7 @@ void readCurrentTimer() {
     data.concat(currentTimer);
     data.concat(SEPARATOR);
     data.concat(targetTimer);
-    data.concat(SEPARATOR);
+    data.concat(END);
     sendData(data);
   }
 }
@@ -181,7 +182,7 @@ void readCurrentStatus() {
   data.concat(STATUS);
   data.concat(SEPARATOR);
   data.concat(status);
-  data.concat(SEPARATOR);
+  data.concat(END);
   sendData(data);
 }
 
@@ -225,7 +226,7 @@ void cookOn() {
     data.concat(STATUS);
     data.concat(SEPARATOR);
     data.concat(PAN_ON);
-    data.concat(SEPARATOR);
+    data.concat(END);
     sendData(data);
   }
 }
@@ -246,7 +247,7 @@ void cookOff() {
     data.concat(STATUS);
     data.concat(SEPARATOR);
     data.concat(PAN_OFF);
-    data.concat(SEPARATOR);
+    data.concat(END);
     sendData(data);
   }
 }
@@ -273,7 +274,7 @@ void setTimer(String timer) {
     data.concat(PAN_TIMER_TARGET);
     data.concat(SEPARATOR);
     data.concat(timer);
-    data.concat(SEPARATOR);
+    data.concat(END);
     sendData(data);
   }
 }
@@ -300,7 +301,7 @@ void setTemperature(String temperature) {
     data.concat(PAN_TEMPERATURE_TARGET);
     data.concat(SEPARATOR);
     data.concat(temperature);
-    data.concat(SEPARATOR);
+    data.concat(END);
     sendData(data);
   }
 }
@@ -356,7 +357,7 @@ void calculatePID() {
     data.concat(PIDOutput);
     data.concat(SEPARATOR);
     data.concat(delta);
-    data.concat(SEPARATOR);
+    data.concat(END);
     sendData(data);
   }
 }
@@ -428,7 +429,7 @@ void sendError(String error) {
   data.concat(STATUS);
   data.concat(SEPARATOR);
   data.concat(error);
-  data.concat(SEPARATOR);
+  data.concat(END);
   sendData(data);
 }
 

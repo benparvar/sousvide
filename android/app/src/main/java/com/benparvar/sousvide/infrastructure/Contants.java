@@ -28,6 +28,11 @@ public class Contants {
         public final int NO_PAIRED_DEVICES = 1;
         public final int YES_PAIRED_DEVICES = 2;
         public final int NO_BLUETOOTH_ADAPTER = 3;
+        public final int INVALID_TEMPERATURE = 4;
+        public final int OFF = 5;
+        public final int ON = 6;
+        public final int READY = 7;
+
     }
 
     // STATUS
