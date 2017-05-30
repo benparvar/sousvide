@@ -6,6 +6,21 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlNormal">#FAFAFA</item>
+    </style>
+
+    <style name="AppThemeCooking" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/colorPrimaryCooking</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDarkCooking</item>
+        <item name="colorAccent">@color/colorAccentCooking</item>
+    </style>
+
+    <style name="default_text_view" parent="TextAppearance.AppCompat.Headline">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">@dimen/default_margin</item>
+        <item name="android:textSize">32sp</item>
+        <item name="android:textColor">#FAFAFA</item>
     </style>
 
 </resources>

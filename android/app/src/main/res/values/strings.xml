@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Sousvide</string>
     <string name="temperature">Temperature</string>
     <string name="timer">Timer</string>
@@ -18,8 +18,20 @@
     <string name="pan_ready">Pan ready</string>
     <!-- Error End -->
 
+    <!-- Pan Status -->
+    <string name="panDisconnected">Disconnected</string>
+    <string name="panConnected">Connected</string>
+    <string name="panOff">Off</string>
+    <string name="panOn">On</string>
+    <string name="panReady">Ready</string>
+    <string name="panCooking">Cooking</string>
+    <string name="panCooked">Cooked</string>
+
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
     <string name="set_timer_target">Set timer target in minutes</string>
     <string name="set_temperature_target">Set temperature target</string>
+    <string name="initial_timer">00:00</string>
+
+    <string name="device_status">Status: <xliff:g id="status">%s</xliff:g></string>
 </resources>
