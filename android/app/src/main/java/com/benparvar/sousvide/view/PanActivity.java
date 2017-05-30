@@ -20,10 +20,12 @@ import android.widget.Toast;
 import com.benparvar.sousvide.R;
 import com.benparvar.sousvide.model.InputTO;
 import com.benparvar.sousvide.presenter.PanPresenter;
+import com.crashlytics.android.Crashlytics;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.fabric.sdk.android.Fabric;
 
 import static com.benparvar.sousvide.infrastructure.Contants.TimTemperatureer.MAX_TARGET_TEMPERATURE;
 import static com.benparvar.sousvide.infrastructure.Contants.TimTemperatureer.MIN_TARGET_TEMPERATURE;
@@ -64,6 +66,7 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_pan);
         ButterKnife.bind(this);
 

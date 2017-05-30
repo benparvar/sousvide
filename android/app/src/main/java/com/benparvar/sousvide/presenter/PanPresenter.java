@@ -88,6 +88,8 @@ public class PanPresenter extends BasePresenter {
     }
 
     public void onClickBtnPan(InputTO inputTO) {
+        Log.d(TAG, inputTO.toString());
+
         if (mPan.getStatus().isEmpty()) {
             this.updatePairedDevices();
 
