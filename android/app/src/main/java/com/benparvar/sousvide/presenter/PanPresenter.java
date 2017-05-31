@@ -86,6 +86,8 @@ public class PanPresenter extends BasePresenter {
     }
 
     public void onClickBtnPan(InputTO inputTO) {
+        Log.d(TAG, inputTO.toString());
+
         if (mPan.getStatus().isEmpty()) {
             this.updatePairedDevices();
 
@@ -175,7 +177,7 @@ public class PanPresenter extends BasePresenter {
     }
 
     private void onReceiveData(String data) {
-        //Log.d(TAG, data);
+        Log.d(TAG, data);
         Boolean error = Boolean.FALSE;
         String string = "";
         int index = 0;
@@ -228,14 +230,17 @@ public class PanPresenter extends BasePresenter {
                         mActivity.setTargetTemperature(this.strToTemperature(preParsedString.get(index++)));
                         break;
                     case PAN_READY:
+                        //PAN READY -> "PAN:S:008"
                         mPan.setStatus(STS_READY);
                         mActivity.updateStatus(getString(R.string.panReady), Boolean.TRUE);
                         break;
                     case PAN_COOK_IN_PROGRESS:
+                        //PAN COOKI IN PROGRESS -> "PAN:S:009"
                         mPan.setStatus(STS_COOK_IN_PROGRESS);
                         mActivity.updateStatus(getString(R.string.panCooking), Boolean.TRUE);
                         break;
                     case PAN_COOK_FINISHED:
+                        //PAN COOKI FINISHED -> "PAN:S:010"
                         mPan.setStatus(STS_COOK_FINISHED);
                         mActivity.updateStatus(getString(R.string.panCooked), Boolean.TRUE);
                         break;
