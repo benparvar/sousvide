@@ -2,15 +2,15 @@ package com.benparvar.sousvide.view;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
@@ -54,7 +54,19 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
     ProgressBar mProgressBar;
 
     @BindView(R.id.pan_btn)
-    ImageButton mButtonPan;
+    ImageView mButtonPan;
+
+    @BindView(R.id.device_status_tvw)
+    TextView tvwDeviceStatus;
+
+    @BindView(R.id.tvw_header)
+    TextView tvwHeader;
+
+    @BindView(R.id.container)
+    View container;
+
+    @BindView(R.id.footer_divider)
+    View footerDivider;
 
     private PanPresenter mPanPresenter;
 
@@ -72,7 +84,7 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
 
         mPanPresenter = new PanPresenter(this);
 
-        this.updateBtnPanStatus(R.color.panDisconnected, Boolean.TRUE);
+        this.updateStatus(getString(R.string.panDisconnected), Boolean.TRUE);
 
         mPanPresenter.configureBluetooh();
         mPanPresenter.configureSpinnerDevices();
@@ -223,13 +235,25 @@ public class PanActivity extends AppCompatActivity implements AdapterView.OnItem
         tvwTargetTemperature.setText(mPanPresenter.doubleToTemperature(temperature));
     }
 
-    public void updateBtnPanStatus(int color, Boolean enabled) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            mButtonPan.setBackgroundColor(getResources().getColor(color, this.getTheme()));
-        } else {
-            mButtonPan.setBackgroundColor(getResources().getColor(color));
-        }
+    public void updateStatus(String status, Boolean enabled) {
+        tvwDeviceStatus.setText(getString(R.string.device_status, status));
         mButtonPan.setEnabled(enabled);
+
+        //TODO Refactor:
+        if (isCooking(status)) {
+            tvwHeader.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimaryDarkCooking));
+            footerDivider.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimaryDarkCooking));
+            container.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimaryCooking));
+        } else {
+            tvwHeader.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            footerDivider.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimaryDark));
+            container.setBackgroundColor(ContextCompat.getColor(this, R.color.colorPrimary));
+        }
+    }
+
+    //TODO Refactor:
+    private boolean isCooking(String status) {
+        return status.equalsIgnoreCase("connected");
     }
 
     public void setTargetTimer(Long timer) {

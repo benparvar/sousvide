@@ -10,7 +10,6 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 
 import com.benparvar.sousvide.R;
-import com.benparvar.sousvide.infrastructure.Contants;
 import com.benparvar.sousvide.model.InputTO;
 import com.benparvar.sousvide.model.Pan;
 import com.benparvar.sousvide.view.PanActivity;
@@ -54,7 +53,6 @@ import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PAN_TIMER;
 import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PAN_TIMER_TARGET;
 import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PAN_VERSION;
 import static com.benparvar.sousvide.infrastructure.Contants.PanVerb.PID_VALUE;
-import static com.benparvar.sousvide.infrastructure.Contants.Timer.MIN_TARGET_TIMER_IN_SECONDS;
 
 /**
  * Created by alans on 19/05/17.
@@ -138,7 +136,7 @@ public class PanPresenter extends BasePresenter {
     public String doubleToTemperature(Double tm) {
         String value = "00.00";
         try {
-            value =  String.format("%02.2f", tm).replace(",", ".");
+            value = String.format("%02.2f", tm).replace(",", ".");
         } catch (Exception e) {
             Log.e(TAG, e.getMessage());
         }
@@ -148,8 +146,10 @@ public class PanPresenter extends BasePresenter {
 
     public Long stringHourToSecond(String hour) {
         String[] hourSlited = hour.split(":");
-        Long result = result = Long.valueOf(hourSlited[0]) * 60 * 60;
+        Long result = Long.valueOf(hourSlited[0]) * 60 * 60;
         result += Long.valueOf(hourSlited[1]) * 60;
+//        Long result = 0L;
+//        result += 0L;
 
         return result;
     }
@@ -167,9 +167,9 @@ public class PanPresenter extends BasePresenter {
         List<BluetoothDevice> devices = this.getPairedBluetoothDevices();
 
         if (CollectionUtils.isEmpty(devices)) {
-            mActivity.updateBtnPanStatus(R.color.panDisconnected, Boolean.TRUE);
+            mActivity.updateStatus(getString(R.string.panDisconnected), Boolean.TRUE);
         } else {
-            mActivity.updateBtnPanStatus(R.color.panConnected, Boolean.TRUE);
+            mActivity.updateStatus(getString(R.string.panConnected), Boolean.TRUE);
         }
 
         this.mBluetoothDevices.addAll(devices);
@@ -198,12 +198,12 @@ public class PanPresenter extends BasePresenter {
                     case PAN_OFF:
                         //PAN OFF -> "PAN:S:000"
                         mPan.setStatus(STS_OFF);
-                        mActivity.updateBtnPanStatus(R.color.panOff, Boolean.TRUE);
+                        mActivity.updateStatus(getString(R.string.panOff), Boolean.TRUE);
                         break;
                     case PAN_ON:
                         //PAN ON -> "PAN:S:001"
                         mPan.setStatus(STS_READY);
-                        mActivity.updateBtnPanStatus(R.color.panOn, Boolean.TRUE);
+                        mActivity.updateStatus(getString(R.string.panOn), Boolean.TRUE);
                         break;
                     case PAN_TIMER:
                         // Nothing...
@@ -232,17 +232,17 @@ public class PanPresenter extends BasePresenter {
                     case PAN_READY:
                         //PAN READY -> "PAN:S:008"
                         mPan.setStatus(STS_READY);
-                        mActivity.updateBtnPanStatus(R.color.panReady, Boolean.TRUE);
+                        mActivity.updateStatus(getString(R.string.panReady), Boolean.TRUE);
                         break;
                     case PAN_COOK_IN_PROGRESS:
                         //PAN COOKI IN PROGRESS -> "PAN:S:009"
                         mPan.setStatus(STS_COOK_IN_PROGRESS);
-                        mActivity.updateBtnPanStatus(R.color.panCooking, Boolean.TRUE);
+                        mActivity.updateStatus(getString(R.string.panCooking), Boolean.TRUE);
                         break;
                     case PAN_COOK_FINISHED:
                         //PAN COOKI FINISHED -> "PAN:S:010"
                         mPan.setStatus(STS_COOK_FINISHED);
-                        mActivity.updateBtnPanStatus(R.color.panCooked, Boolean.TRUE);
+                        mActivity.updateStatus(getString(R.string.panCooked), Boolean.TRUE);
                         break;
                     case PID_VALUE:
                         //PAN PID -> "PAN:S:011:00000"
@@ -278,9 +278,9 @@ public class PanPresenter extends BasePresenter {
     private Double strToTemperature(String value) {
         Double result = 0.0;
         try {
-            result =  Double.valueOf(value) / 100;
+            result = Double.valueOf(value) / 100;
         } catch (NumberFormatException e) {
-          Log.e(TAG, e.getMessage());
+            Log.e(TAG, e.getMessage());
         }
 
         return result;
@@ -299,6 +299,7 @@ public class PanPresenter extends BasePresenter {
 
     /**
      * Heater temperature in degrees Celsius (minimum is 30.00 -> 3000 and maximum is 60.00 -> 6000)
+     *
      * @param targetTemperature
      */
     public void setTargetTemperature(Double targetTemperature) {
@@ -310,6 +311,7 @@ public class PanPresenter extends BasePresenter {
 
     /**
      * Heater timer target in minutes (minimum is 0.50 -> 050 and maximum is 1440.00 -> 144000)
+     *
      * @param targetTimer
      */
     public void setTargetTimer(Long targetTimer) {
@@ -440,7 +442,8 @@ public class PanPresenter extends BasePresenter {
                                 if (b == delimiter) {
                                     byte[] encodedBytes = new byte[readBufferPosition];
                                     System.arraycopy(readBuffer, 0, encodedBytes, 0, encodedBytes.length);
-                                    final String data = new String(encodedBytes, "US-ASCII").replace("�", ""); // Removing the character �
+                                    final String data = new String(encodedBytes, "US-ASCII").replace("�", ""); //
+                                    // Removing the character �
                                     readBufferPosition = 0;
 
                                     handler.post(new Runnable() {

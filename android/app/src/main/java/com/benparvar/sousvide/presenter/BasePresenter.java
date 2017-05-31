@@ -48,4 +48,8 @@ public abstract class BasePresenter {
         Log.d(TAG, message);
         Toast.makeText(this.mActivity, message, Toast.LENGTH_LONG);
     }
+
+    protected String getString(int resId) {
+        return mActivity.getString(resId);
+    }
 }
