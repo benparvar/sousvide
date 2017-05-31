@@ -3,11 +3,9 @@
     <color name="colorPrimary">#607D8B</color>
     <color name="colorPrimaryDark">#455A64</color>
     <color name="colorAccent">#FF5252</color>
-
-    <color name="colorPrimaryCooking">#d32f2f</color>
-    <color name="colorPrimaryDarkCooking">#b71c1c</color>
+    <color name="colorPrimaryCooking">#F44336</color>
+    <color name="colorPrimaryDarkCooking">#D32F2F</color>
     <color name="colorAccentCooking">#03A9F4</color>
-
     <color name="panDisconnected">#CCCCCC</color>
     <color name="panConnected">#7ad974</color>
     <color name="panOff">#6078ef</color>
