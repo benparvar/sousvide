@@ -65,13 +65,13 @@
                         android:id="@+id/current_temperature_tvw"
                         style="@style/default_text_view"
                         android:layout_gravity="center"
-                        android:text="@string/initial_timer"/>
+                        android:text="@string/initial_temperature"/>
 
                     <TextView
                         android:id="@+id/target_temperature_tvw"
                         style="@style/default_text_view"
                         android:layout_gravity="center"
-                        android:text="@string/initial_timer"/>
+                        android:text="@string/initial_temperature"/>
 
                 </LinearLayout>
 

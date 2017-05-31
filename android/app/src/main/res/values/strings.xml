@@ -32,6 +32,7 @@
     <string name="set_timer_target">Set timer target in minutes</string>
     <string name="set_temperature_target">Set temperature target</string>
     <string name="initial_timer">00:00</string>
+    <string name="initial_temperature">00.00</string>
 
     <string name="device_status">Status: <xliff:g id="status">%s</xliff:g></string>
 </resources>
